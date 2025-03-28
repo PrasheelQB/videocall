@@ -1,0 +1,27 @@
+{
+  "canisters": {
+    "videocall-dapp-backend": {
+      "candid": "src/videocall-dapp-backend/videocall-dapp-backend.did",
+      "package": "videocall-dapp-backend",
+      "type": "rust"
+    },
+    "videocall-dapp-frontend": {
+      "dependencies": [
+        "videocall-dapp-backend"
+      ],
+      "source": [
+        "src/videocall-dapp-frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "videocall-dapp-frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}

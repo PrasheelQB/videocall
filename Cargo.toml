@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "src/videocall-dapp-backend"
+]
+resolver = "2"
