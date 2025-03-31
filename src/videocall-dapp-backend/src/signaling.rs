@@ -2,6 +2,7 @@ use ic_cdk::println;
 use ic_websocket_cdk::types::{ClientPrincipal, OnCloseCallbackArgs, OnMessageCallbackArgs, OnOpenCallbackArgs};
 use candid::{CandidType, Principal};
 use serde::{Deserialize, Serialize};
+use serde_json; // Add this
 use std::cell::RefCell;
 use std::collections::HashMap;
 
@@ -24,7 +25,8 @@ pub fn on_open(args: OnOpenCallbackArgs) {
         let mut pending = pending.borrow_mut();
         if let Some(messages) = pending.remove(&client_principal) {
             for msg in messages {
-                let _ = ic_websocket_cdk::send(client_principal, candid::encode_one(&msg).unwrap());
+                let json_msg = serde_json::to_string(&msg).unwrap(); // Convert to JSON
+                let _ = ic_websocket_cdk::send(client_principal, json_msg.into_bytes());
             }
         }
     });
@@ -52,7 +54,8 @@ pub fn on_message(args: OnMessageCallbackArgs) {
                 sessions.insert(sender, msg.to);
             }
 
-            if ic_websocket_cdk::send(msg.to, candid::encode_one(&msg).unwrap()).is_ok() {
+            let json_msg = serde_json::to_string(&msg).unwrap(); // Convert to JSON
+            if ic_websocket_cdk::send(msg.to, json_msg.into_bytes()).is_ok() {
                 println!("Sent {} to {}", msg.kind, msg.to);
             } else {
                 pending.entry(msg.to).or_insert_with(Vec::new).push(msg.clone());

@@ -3,53 +3,61 @@ import websocketService from "./services/websocketService";
 import "./index.scss";
 
 function App() {
-    const [messages, setMessages] = useState([]);
-    const [input, setInput] = useState("");
+    const [calleePrincipal, setCalleePrincipal] = useState("");
+    const [status, setStatus] = useState("Disconnected");
 
     useEffect(() => {
         websocketService.connect();
+        websocketService.initializeRTC();
 
-        websocketService.addEventListener("message", (data) => {
-            setMessages((prev) => [...prev, data]);
-        });
+        websocketService.addEventListener("open", () => setStatus("Connected"));
+        websocketService.addEventListener("close", () => setStatus("Disconnected"));
 
         return () => {
-            console.log("Component unmounting, closing WebSocket");
+            if (websocketService.socket) {
+                websocketService.socket.close();
+            }
         };
     }, []);
 
-    const sendMessage = () => {
-        if (input.trim()) {
-            const message = { kind: "chat", data: input };
-            websocketService.sendMessage(message);
-            setInput("");
+    const startCall = async () => {
+        try {
+            await websocketService.addLocalStream();
+            const offer = await websocketService.createOffer();
+            websocketService.peerPrincipal = calleePrincipal;
+            websocketService.sendMessage({
+                kind: "offer",
+                to: calleePrincipal,
+                data: JSON.stringify(offer)
+            });
+            setStatus("Calling...");
+        } catch (error) {
+            console.error("Failed to start call:", error);
+            setStatus("Error: " + error.message);
         }
     };
 
     return (
         <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white p-4">
-            <h1 className="text-2xl font-bold mb-4">WebSocket Chat</h1>
-            <div className="border border-gray-500 p-4 w-96 h-64 overflow-y-auto">
-                {messages.map((msg, index) => (
-                    <div key={index} className="p-2 border-b border-gray-700">
-                        {JSON.stringify(msg)}
-                    </div>
-                ))}
+            <h1 className="text-2xl font-bold mb-4">Video Call Dapp</h1>
+            <div className="flex space-x-4">
+                <video id="localVideo" autoPlay muted className="w-48 h-36 bg-black rounded"></video>
+                <video id="remoteVideo" autoPlay className="w-48 h-36 bg-black rounded"></video>
             </div>
-            <div className="mt-4 flex">
-                <input
-                    type="text"
-                    className="p-2 text-black rounded-l-md"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                />
-                <button
-                    onClick={sendMessage}
-                    className="bg-blue-500 px-4 py-2 rounded-r-md"
-                >
-                    Send
-                </button>
-            </div>
+            <input
+                type="text"
+                placeholder="Enter callee Principal (e.g., bkyz2-fmaaa-aaaaa-qaaaq-cai)"
+                className="p-2 mt-4 text-black rounded w-80"
+                value={calleePrincipal}
+                onChange={(e) => setCalleePrincipal(e.target.value)}
+            />
+            <button
+                onClick={startCall}
+                className="mt-4 bg-blue-500 px-4 py-2 rounded hover:bg-blue-600"
+            >
+                Start Call
+            </button>
+            <p className="mt-2">{status}</p>
         </div>
     );
 }

@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react'; // Add this
 import { fileURLToPath, URL } from 'url';
 import environment from 'vite-plugin-environment';
 import dotenv from 'dotenv';
@@ -26,6 +27,7 @@ export default defineConfig({
   },
   publicDir: "assets",
   plugins: [
+    react(), // Add this
     environment("all", { prefix: "CANISTER_" }),
     environment("all", { prefix: "DFX_" }),
   ],
