@@ -1,9 +1,10 @@
 {
   "canisters": {
     "videocall-dapp-backend": {
-      "candid": "src/videocall-dapp-backend/videocall-dapp-backend.did",
+      "main": "src/videocall-dapp-backend/src/lib.rs",
       "package": "videocall-dapp-backend",
-      "type": "rust"
+      "type": "rust",
+      "candid": "src/videocall-dapp-backend/videocall-dapp-backend.did"
     },
     "videocall-dapp-frontend": {
       "dependencies": [
@@ -12,8 +13,7 @@
       "source": [
         "src/videocall-dapp-frontend/dist"
       ],
-      "type": "assets",
-      "workspace": "videocall-dapp-frontend"
+      "type": "assets"
     }
   },
   "defaults": {

@@ -1,3 +1,87 @@
+// Application-specific types
+type SignalingMessage = record {
+  to: principal;
+  kind: text;
+  data: vec nat8;
+};
+
+// IC WebSocket types
+type ClientPrincipal = principal;
+type GatewayPrincipal = principal;
+type ClientKey = record {
+  canister_id: ClientPrincipal;  // Matches your lib.rs
+  nonce: nat64;                 // Matches your lib.rs (client_nonce renamed to nonce)
+};
+
+type WebsocketMessage = record {
+  client_key: ClientKey;
+  sequence_num: nat64;
+  timestamp: nat64;
+  is_service_message: bool;
+  content: blob;
+};
+
+type CanisterOutputMessage = record {
+  client_key: ClientKey;
+  key: text;
+  content: blob;
+};
+
+type CanisterOutputCertifiedMessages = record {
+  messages: vec CanisterOutputMessage;
+  cert: blob;
+  tree: blob;
+  is_end_of_queue: bool;
+};
+
+type CanisterWsOpenArguments = record {
+  client_key: ClientKey;         // Matches your lib.rs
+  gateway_principal: GatewayPrincipal;
+};
+
+type CanisterWsOpenResult = variant {
+  Ok: null;
+  Err: text;
+};
+
+type CanisterWsCloseArguments = record {
+  client_key: ClientKey;
+};
+
+type CanisterWsCloseResult = variant {
+  Ok: null;
+  Err: text;
+};
+
+type CanisterWsMessageArguments = record {
+  client_key: ClientKey;         // Matches your lib.rs
+  msg_type: opt SignalingMessage;
+};
+
+type CanisterWsMessageResult = variant {
+  Ok: null;
+  Err: text;
+};
+
+type CanisterWsGetMessagesArguments = record {
+  nonce: nat64;
+};
+
+type CanisterWsGetMessagesResult = variant {
+  Ok: CanisterOutputCertifiedMessages;
+  Err: text;
+};
+
+// Custom type for start_call
+type StartCallResult = variant {
+  Ok: text;
+  Err: text;
+};
+
 service : {
-    "greet": (text) -> (text) query;
+  "ws_open": (CanisterWsOpenArguments) -> (CanisterWsOpenResult);
+  "ws_close": (CanisterWsCloseArguments) -> (CanisterWsCloseResult);
+  "ws_message": (CanisterWsMessageArguments) -> (CanisterWsMessageResult);
+  "ws_get_messages": (CanisterWsGetMessagesArguments) -> (CanisterWsGetMessagesResult) query;
+  "start_call": (principal) -> (StartCallResult);
 }

@@ -9,6 +9,9 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-candid = "0.10"
-ic-cdk = "0.17"
-ic-cdk-timers = "0.11" # Feel free to remove this dependency if you don't need timers
+candid = "0.10"          # Matches your default and ic_websocket_example
+ic-cdk = "0.16"          # Compatible with ic-websocket-cdk v0.4.1 per example
+ic-cdk-timers = "0.11"   # Optional, keep if you need timers
+ic-websocket-cdk = "0.4.1"  # Latest published version from crates.io
+serde = { version = "1.0", features = ["derive"] }  # For serialization
+serde_bytes = "0.11"      # For binary data (WebRTC signaling)
